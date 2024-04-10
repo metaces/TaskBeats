@@ -1,3 +1,5 @@
 package com.comunidadedevspace.taskbeats
 
-data class Task(val Title: String, val Description: String)
+import java.io.Serializable
+
+data class Task(val Title: String, val Description: String): Serializable
