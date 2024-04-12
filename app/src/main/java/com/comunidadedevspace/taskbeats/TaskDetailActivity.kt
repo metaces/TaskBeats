@@ -12,6 +12,8 @@ import android.widget.TextView
 
 class TaskDetailActivity : AppCompatActivity() {
 
+    private lateinit var task: Task
+
     companion object{
         private const val TASK_DETAIL_EXTRA = "task.extra.detail"
 
@@ -27,8 +29,7 @@ class TaskDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_detail)
 
-        val task: Task? = intent.getSerializableExtra(TASK_DETAIL_EXTRA) as Task?
-        requireNotNull(task)
+        task = intent.getSerializableExtra(TASK_DETAIL_EXTRA) as Task
 
         val tvTitle = findViewById<TextView>(R.id.tv_task_title_detail)
 
@@ -47,7 +48,9 @@ class TaskDetailActivity : AppCompatActivity() {
             R.id.delete_task -> {
                 val  intent = Intent()
                     .apply {
-                        putExtra("resultado_detail", "resultado")
+                        val actionType = ActionType.DELETE
+                        val taskAction = TaskAction(task, actionType)
+                        putExtra(TASK_ACTION_RESULT, taskAction)
                     }
                 setResult(Activity.RESULT_OK, intent)
                 finish()

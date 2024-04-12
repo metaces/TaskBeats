@@ -7,25 +7,33 @@ import android.os.Bundle
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.RecyclerView
+import java.io.Serializable
 
 class MainActivity : AppCompatActivity() {
+
+    private val taskList = arrayListOf(
+        Task(0, "title0", "desc0"),
+        Task(1, "title1", "desc1")
+    )
+
+    private val adapter = TaskListAdapter(::openTaskDetailView)
 
     private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
         if(result.resultCode == Activity.RESULT_OK) {
-            // val result = result.data
-            println("Chegou!")
+            val data = result.data
+            val taskAction = data?.getSerializableExtra(TASK_ACTION_RESULT) as TaskAction
+            val task: Task = taskAction.task
+            taskList.remove(task)
+            adapter.submit(taskList)
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val taskList: List<Task>  = listOf(
-            Task("title0", "desc0"),
-            Task("title1", "desc1")
-        )
-        val adapter = TaskListAdapter(taskList, ::openTaskDetailView)
+        adapter.submit(taskList)
+
         val rvTaskList: RecyclerView = findViewById(R.id.rv_task_list)
 
         rvTaskList.adapter = adapter
@@ -37,3 +45,13 @@ class MainActivity : AppCompatActivity() {
         startForResult.launch(intent)
     }
 }
+
+sealed class ActionType : Serializable {
+    object DELETE: ActionType()
+    object UPDATE: ActionType()
+    object CREATE: ActionType()
+}
+
+data class TaskAction(val task: Task, val actionType: ActionType): Serializable
+
+const val TASK_ACTION_RESULT = "TASK_ACTION_RESULT"
