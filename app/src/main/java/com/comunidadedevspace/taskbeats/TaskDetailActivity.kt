@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 
 class TaskDetailActivity : AppCompatActivity() {
@@ -19,7 +18,7 @@ class TaskDetailActivity : AppCompatActivity() {
     private lateinit var btnDone: Button
     private var task: Task? = null
 
-    companion object{
+    companion object {
         private const val TASK_DETAIL_EXTRA = "task.extra.detail"
 
         fun start(context: Context, task: Task?): Intent {
@@ -30,6 +29,7 @@ class TaskDetailActivity : AppCompatActivity() {
             return intent
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_detail)
@@ -41,16 +41,20 @@ class TaskDetailActivity : AppCompatActivity() {
         btnDone = findViewById<Button>(R.id.btn_task_done)
 
         if (task != null) {
-            edtTitle.setText(task!!.Title)
-            edtDesc.setText(task!!.Description)
+            edtTitle.setText(task!!.title)
+            edtDesc.setText(task!!.description)
         }
 
         btnDone.setOnClickListener {
             val title = edtTitle.text.toString()
             val desc = edtDesc.text.toString()
 
-            if(title.isNotEmpty() && desc.isNotEmpty()) {
-                addNewTask(title, desc)
+            if (title.isNotEmpty() && desc.isNotEmpty()) {
+                if (task == null) {
+                    addOrUpdateTask(0, title, desc, ActionType.CREATE)
+                } else {
+                    addOrUpdateTask(task!!.id, title, desc, ActionType.UPDATE)
+                }
             } else {
                 showMessage(it, "Fields are required!")
             }
@@ -58,10 +62,14 @@ class TaskDetailActivity : AppCompatActivity() {
 
     }
 
-    private fun addNewTask(title: String, desc: String) {
-        val newTask = Task(0, title, desc)
-        returnAction(newTask, ActionType.CREATE)
-
+    private fun addOrUpdateTask(
+        id: Int,
+        title: String,
+        desc: String,
+        actionType: ActionType
+    ) {
+        val task = Task(id, title, desc)
+        returnAction(task, actionType)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -81,12 +89,13 @@ class TaskDetailActivity : AppCompatActivity() {
                 }
                 true
             }
-            else ->  super.onOptionsItemSelected(item)
+
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun returnAction(task: Task, actionType: ActionType) {
-        val  intent = Intent()
+        val intent = Intent()
             .apply {
                 val taskAction = TaskAction(task, actionType.name)
                 putExtra(TASK_ACTION_RESULT, taskAction)

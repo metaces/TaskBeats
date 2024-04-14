@@ -22,43 +22,69 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = TaskListAdapter(::onListItemClicked)
 
-    private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result: ActivityResult ->
-        if(result.resultCode == Activity.RESULT_OK) {
-            val data = result.data
-            val taskAction = data?.getSerializableExtra(TASK_ACTION_RESULT) as TaskAction
-            val task: Task = taskAction.task
+    private val startForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data
+                val taskAction = data?.getSerializableExtra(TASK_ACTION_RESULT) as TaskAction
+                val task: Task = taskAction.task
 
-            if(taskAction.actionType == ActionType.DELETE.name) {
-                val newList = arrayListOf<Task>()
-                    .apply {
-                        addAll(taskList)
+                if (taskAction.actionType == ActionType.DELETE.name) {
+                    val newList = arrayListOf<Task>()
+                        .apply {
+                            addAll(taskList)
+                        }
+                    newList.remove(task)
+
+                    showMessage(ctnContent, "Item deletado ${task.title}")
+                    if (newList.size == 0) {
+                        ctnContent.visibility = View.VISIBLE
                     }
-                newList.remove(task)
+                    adapter.submitList(newList)
 
-                showMessage(ctnContent, "Item deletado ${task.Title}")
-                if(newList.size == 0) {
-                    ctnContent.visibility = View.VISIBLE
+                    taskList = newList
+                } else if (taskAction.actionType == ActionType.CREATE.name) {
+                    val newList = arrayListOf<Task>()
+                        .apply {
+                            addAll(taskList)
+                        }
+                    newList.add(task)
+
+                    showMessage(ctnContent, "Item adicionado ${task.title}")
+                    adapter.submitList(newList)
+
+                    taskList = newList
+
+                } else if (taskAction.actionType == ActionType.UPDATE.name) {
+
+                    val tempListEmpty = arrayListOf<Task>()
+                    taskList.forEach {
+                        if (it.id == task.id) {
+                            val newItem = Task(
+                                it.id,
+                                task.title,
+                                task.description
+                            )
+                            tempListEmpty.add(
+                                newItem
+                            )
+                        } else {
+                            tempListEmpty.add(it)
+                        }
+
+                    }
+
+                    showMessage(ctnContent, "Item alterado ${task.title}")
+
+                    adapter.submitList(tempListEmpty)
+
+                    taskList = tempListEmpty
+
                 }
-                adapter.submitList(newList)
-
-                taskList = newList
-            } else if(taskAction.actionType == ActionType.CREATE.name) {
-                val newList = arrayListOf<Task>()
-                    .apply {
-                        addAll(taskList)
-                    }
-                newList.add(task)
-
-                showMessage(ctnContent, "Item adicionado ${task.Title}")
-                adapter.submitList(newList)
-
-                taskList = newList
 
             }
-
         }
-    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_list)
@@ -101,6 +127,6 @@ enum class ActionType {
     CREATE
 }
 
-data class TaskAction(val task: Task, val actionType: String): Serializable
+data class TaskAction(val task: Task, val actionType: String) : Serializable
 
 const val TASK_ACTION_RESULT = "TASK_ACTION_RESULT"

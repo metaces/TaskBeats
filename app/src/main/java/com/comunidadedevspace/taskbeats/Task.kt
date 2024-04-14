@@ -4,6 +4,6 @@ import java.io.Serializable
 
 data class Task(
     val id: Int,
-    val Title: String,
-    val Description: String
+    val title: String,
+    val description: String
 ): Serializable

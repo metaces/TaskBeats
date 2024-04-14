@@ -32,8 +32,8 @@ class TaskListAdapter(
         }
 
         override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
-            return  oldItem.Title == newItem.Title &&
-                    oldItem.Description == newItem.Description
+            return  oldItem.title == newItem.title &&
+                    oldItem.description == newItem.description
         }
 
     }
@@ -49,8 +49,8 @@ class TaskListViewHolder(private val view: View): RecyclerView.ViewHolder(view) 
         task: Task,
         openTaskDetailView:(task: Task) -> Unit
     ) {
-        tvTitle.text = task.Title
-        tvDescription.text = task.Description
+        tvTitle.text = task.title
+        tvDescription.text = task.description
 
         view.setOnClickListener { openTaskDetailView.invoke(task) }
     }
