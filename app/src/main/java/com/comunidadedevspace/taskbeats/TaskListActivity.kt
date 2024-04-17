@@ -8,7 +8,11 @@ import android.widget.LinearLayout
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import java.io.Serializable
 
 class MainActivity : AppCompatActivity() {
@@ -88,6 +92,19 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_list)
+
+        val database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "database-taskbeat"
+        ).build()
+
+        val dao = database.taskDao()
+
+        val task = Task( title = "title0", description = "desc0")
+        CoroutineScope(IO).launch {
+            dao.insert(task)
+        }
+
 
         ctnContent = findViewById(R.id.ctn_content)
 
