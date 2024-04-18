@@ -61,30 +61,7 @@ class MainActivity : AppCompatActivity() {
                     insertIntoDb(task)
 
                 } else if (taskAction.actionType == ActionType.UPDATE.name) {
-
-//                    val tempListEmpty = arrayListOf<Task>()
-//                    taskList.forEach {
-//                        if (it.id == task.id) {
-//                            val newItem = Task(
-//                                it.id,
-//                                task.title,
-//                                task.description
-//                            )
-//                            tempListEmpty.add(
-//                                newItem
-//                            )
-//                        } else {
-//                            tempListEmpty.add(it)
-//                        }
-//
-//                    }
-//
-//                    showMessage(ctnContent, "Item alterado ${task.title}")
-//
-//                    adapter.submitList(tempListEmpty)
-//
-//                    taskList = tempListEmpty
-
+                    updateIntoDb(task)
                 }
 
             }
@@ -106,6 +83,13 @@ class MainActivity : AppCompatActivity() {
             openTaskListDetail(null)
         }
 
+    }
+
+    private fun updateIntoDb(task: Task) {
+        CoroutineScope(IO).launch {
+            dao.update(task)
+            listFromDb()
+        }
     }
 
     private fun insertIntoDb(task: Task) {
