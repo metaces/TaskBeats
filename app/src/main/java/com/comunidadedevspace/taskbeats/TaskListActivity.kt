@@ -3,6 +3,9 @@ package com.comunidadedevspace.taskbeats
 import android.app.Activity
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import androidx.activity.result.ActivityResult
@@ -43,25 +46,10 @@ class MainActivity : AppCompatActivity() {
                 val taskAction = data?.getSerializableExtra(TASK_ACTION_RESULT) as TaskAction
                 val task: Task = taskAction.task
 
-                if (taskAction.actionType == ActionType.DELETE.name) {
-//                    val newList = arrayListOf<Task>()
-//                        .apply {
-//                            addAll(taskList)
-//                        }
-//                    newList.remove(task)
-//
-//                    showMessage(ctnContent, "Item deletado ${task.title}")
-//                    if (newList.size == 0) {
-//                        ctnContent.visibility = View.VISIBLE
-//                    }
-//                    adapter.submitList(newList)
-//
-//                    taskList = newList
-                } else if (taskAction.actionType == ActionType.CREATE.name) {
-                    insertIntoDb(task)
-
-                } else if (taskAction.actionType == ActionType.UPDATE.name) {
-                    updateIntoDb(task)
+                when (taskAction.actionType) {
+                    ActionType.DELETE.name -> deleteByIdDb(task.id)
+                    ActionType.CREATE.name -> insertIntoDb(task)
+                    ActionType.UPDATE.name -> updateIntoDb(task)
                 }
 
             }
@@ -70,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_list)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
         listFromDb()
         ctnContent = findViewById(R.id.ctn_content)
@@ -83,6 +72,20 @@ class MainActivity : AppCompatActivity() {
             openTaskListDetail(null)
         }
 
+    }
+
+    private fun deleteByIdDb(id: Int) {
+        CoroutineScope(IO).launch {
+            dao.deleteTask(id)
+            listFromDb()
+        }
+    }
+
+    private fun deleteAllDb() {
+        CoroutineScope(IO).launch {
+            dao.deleteAll()
+            listFromDb()
+        }
     }
 
     private fun updateIntoDb(task: Task) {
@@ -126,6 +129,24 @@ class MainActivity : AppCompatActivity() {
         val intent = TaskDetailActivity.start(this, task)
 
         startForResult.launch(intent)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_task_list, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection.
+        return when (item.itemId) {
+            R.id.delete_all_task -> {
+                deleteAllDb()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }
 
