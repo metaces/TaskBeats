@@ -19,12 +19,22 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var ctnContent: LinearLayout
 
-    private var taskList = arrayListOf(
-        Task(0, "title0", "desc0"),
-        Task(1, "title1", "desc1")
-    )
+    private val adapter: TaskListAdapter by lazy {
+        TaskListAdapter((::onListItemClicked))
+    }
 
-    private val adapter = TaskListAdapter(::onListItemClicked)
+
+    private val database by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "database-taskbeat"
+        ).build()
+    }
+
+
+    private val dao by lazy{
+        database.taskDao()
+    }
 
     private val startForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -34,55 +44,46 @@ class MainActivity : AppCompatActivity() {
                 val task: Task = taskAction.task
 
                 if (taskAction.actionType == ActionType.DELETE.name) {
-                    val newList = arrayListOf<Task>()
-                        .apply {
-                            addAll(taskList)
-                        }
-                    newList.remove(task)
-
-                    showMessage(ctnContent, "Item deletado ${task.title}")
-                    if (newList.size == 0) {
-                        ctnContent.visibility = View.VISIBLE
-                    }
-                    adapter.submitList(newList)
-
-                    taskList = newList
+//                    val newList = arrayListOf<Task>()
+//                        .apply {
+//                            addAll(taskList)
+//                        }
+//                    newList.remove(task)
+//
+//                    showMessage(ctnContent, "Item deletado ${task.title}")
+//                    if (newList.size == 0) {
+//                        ctnContent.visibility = View.VISIBLE
+//                    }
+//                    adapter.submitList(newList)
+//
+//                    taskList = newList
                 } else if (taskAction.actionType == ActionType.CREATE.name) {
-                    val newList = arrayListOf<Task>()
-                        .apply {
-                            addAll(taskList)
-                        }
-                    newList.add(task)
-
-                    showMessage(ctnContent, "Item adicionado ${task.title}")
-                    adapter.submitList(newList)
-
-                    taskList = newList
+                    insertIntoDb(task)
 
                 } else if (taskAction.actionType == ActionType.UPDATE.name) {
 
-                    val tempListEmpty = arrayListOf<Task>()
-                    taskList.forEach {
-                        if (it.id == task.id) {
-                            val newItem = Task(
-                                it.id,
-                                task.title,
-                                task.description
-                            )
-                            tempListEmpty.add(
-                                newItem
-                            )
-                        } else {
-                            tempListEmpty.add(it)
-                        }
-
-                    }
-
-                    showMessage(ctnContent, "Item alterado ${task.title}")
-
-                    adapter.submitList(tempListEmpty)
-
-                    taskList = tempListEmpty
+//                    val tempListEmpty = arrayListOf<Task>()
+//                    taskList.forEach {
+//                        if (it.id == task.id) {
+//                            val newItem = Task(
+//                                it.id,
+//                                task.title,
+//                                task.description
+//                            )
+//                            tempListEmpty.add(
+//                                newItem
+//                            )
+//                        } else {
+//                            tempListEmpty.add(it)
+//                        }
+//
+//                    }
+//
+//                    showMessage(ctnContent, "Item alterado ${task.title}")
+//
+//                    adapter.submitList(tempListEmpty)
+//
+//                    taskList = tempListEmpty
 
                 }
 
@@ -93,22 +94,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_list)
 
-        val database = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "database-taskbeat"
-        ).build()
-
-        val dao = database.taskDao()
-
-        val task = Task( title = "title0", description = "desc0")
-        CoroutineScope(IO).launch {
-            dao.insert(task)
-        }
-
-
+        listFromDb()
         ctnContent = findViewById(R.id.ctn_content)
-
-        adapter.submitList(taskList)
 
         val rvTaskList: RecyclerView = findViewById(R.id.rv_task_list)
 
@@ -119,6 +106,26 @@ class MainActivity : AppCompatActivity() {
             openTaskListDetail(null)
         }
 
+    }
+
+    private fun insertIntoDb(task: Task) {
+        CoroutineScope(IO).launch {
+            dao.insert(task)
+            listFromDb()
+        }
+    }
+
+    private fun listFromDb() {
+        CoroutineScope(IO).launch {
+            val dbList: List<Task> = dao.getAll()
+            adapter.submitList(dbList)
+
+//            if (dbList.isEmpty()) {
+//                ctnContent.visibility = View.VISIBLE
+//            } else {
+//                ctnContent.visibility = View.GONE
+//            }
+        }
     }
 
     private fun showMessage(view: View, message: String) {
