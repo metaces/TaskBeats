@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.comunidadedevspace.taskbeats.R
+import com.comunidadedevspace.taskbeats.TaskBeatsApplication
 import com.comunidadedevspace.taskbeats.data.AppDatabase
 import com.comunidadedevspace.taskbeats.data.Task
 import com.google.android.material.snackbar.Snackbar
@@ -29,14 +30,11 @@ class MainActivity : AppCompatActivity() {
         TaskListAdapter((::onListItemClicked))
     }
 
-
-    private val database by lazy {
-        Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "database-taskbeat"
-        ).build()
+    private val viewModel: TaskListViewModel by lazy {
+        TaskListViewModel.create(application)
     }
 
+    lateinit var database: AppDatabase
 
     private val dao by lazy{
         database.taskDao()
@@ -63,7 +61,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_task_list)
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        listFromDb()
         ctnContent = findViewById(R.id.ctn_content)
 
         val rvTaskList: RecyclerView = findViewById(R.id.rv_task_list)
@@ -75,6 +72,15 @@ class MainActivity : AppCompatActivity() {
             openTaskListDetail(null)
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        database = (application as TaskBeatsApplication).getAppDataBase()
+
+        listFromDb()
+        
     }
 
     private fun deleteByIdDb(id: Int) {
