@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/task_list"
+        android:icon="@drawable/baseline_checklist_24"
+        app:showAsAction="ifRoom"
+        android:title="tasks"
+        tools:ignore="HardcodedText" />
+
+    <item
+        android:id="@+id/news_list"
+        android:icon="@drawable/baseline_article_24"
+        app:showAsAction="ifRoom"
+        android:title="news"
+        tools:ignore="HardcodedText"
+        />
+</menu>
