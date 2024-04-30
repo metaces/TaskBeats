@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import com.comunidadedevspace.taskbeats.R
+import com.comunidadedevspace.taskbeats.data.Task
 import com.google.android.material.bottomappbar.BottomAppBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,6 +15,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val bottomAppBar = findViewById<BottomAppBar>(R.id.bottomAppBar)
+        val floatActionButton = findViewById<FloatingActionButton>(R.id.floatActionButton)
+
         val taskListFragment = TaskListFragment.newInstance()
         val newsListFragment = NewsListFragment.newInstance()
 
@@ -20,6 +24,10 @@ class MainActivity : AppCompatActivity() {
             replace(R.id.fragment_container_view, taskListFragment)
             setReorderingAllowed(true)
 
+        }
+
+        floatActionButton.setOnClickListener {
+            openTaskListDetail()
         }
 
         bottomAppBar.setOnMenuItemClickListener { menuItem ->
@@ -38,6 +46,10 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
+    }
 
+    private fun openTaskListDetail() {
+        val intent = TaskDetailActivity.start(this, null)
+        startActivity(intent)
     }
 }
