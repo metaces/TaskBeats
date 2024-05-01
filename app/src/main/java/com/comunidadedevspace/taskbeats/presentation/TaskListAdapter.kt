@@ -42,7 +42,9 @@ class TaskListAdapter(
 
 }
 
-class TaskListViewHolder(private val view: View): RecyclerView.ViewHolder(view) {
+class TaskListViewHolder(
+    private val view: View
+): RecyclerView.ViewHolder(view) {
 
     private val tvTitle = view.findViewById<TextView>(R.id.tv_task_title)
     private val tvDescription = view.findViewById<TextView>(R.id.tv_task_desc)
