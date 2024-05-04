@@ -5,12 +5,16 @@ import com.comunidadedevspace.taskbeats.data.TaskDao
 import com.comunidadedevspace.taskbeats.presentation.ActionType
 import com.comunidadedevspace.taskbeats.presentation.TaskAction
 import com.comunidadedevspace.taskbeats.presentation.TaskDetailViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
 class TaskDetailViewModelTest {
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
     private val taskDao: TaskDao = mock()
     private val underTest: TaskDetailViewModel by lazy {

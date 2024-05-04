@@ -12,8 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class TaskDetailViewModel(
-    private val taskDao: TaskDao,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO): ViewModel() {
+    private val taskDao: TaskDao): ViewModel() {
 
     fun execute(taskAction: TaskAction) {
         when (taskAction.actionType) {
@@ -25,19 +24,19 @@ class TaskDetailViewModel(
     }
 
     private fun deleteByIdDb(id: Int) {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             taskDao.deleteTask(id)
         }
     }
 
     private fun insertIntoDb(task: Task) {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             taskDao.insert(task)
         }
     }
 
     private fun updateIntoDb(task: Task) {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             taskDao.update(task)
         }
     }
